@@ -45,4 +45,3 @@ spec:
         resources:
           requests:
             cpu: 200m
-
