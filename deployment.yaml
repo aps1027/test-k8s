@@ -1,21 +1,48 @@
-apiVersion: apps/v1
+kind: Service
+apiVersion: v1
+metadata:
+  name: train-schedule-service
+spec:
+  type: LoadBalancer
+  selector:
+    app: train-schedule
+  ports:
+  - protocol: TCP
+    port: 8080
+
+---
+
+apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: laravel-kubernetes-demo
+  name: train-schedule-deployment
+  labels:
+    app: train-schedule
 spec:
+  replicas: 2
   selector:
     matchLabels:
-      run: laravel-kubernetes-demo
+      app: train-schedule
+      track: stable
   template:
     metadata:
       labels:
-        run: laravel-kubernetes-demo
+        app: train-schedule
+        track: stable
     spec:
       containers:
-        - name: demo
-          image: blackindark/laravel-kubernetes-demo:latest
-          ports:
-            - containerPort: 80
-          env:
-            - name: APP_KEY
-              value: base64:cUPmwHx4LXa4Z25HhzFiWCf7TlQmSqnt98pnuiHmzgY=
+      - name: train-schedule
+        image: sampriyadarshi/train-schedule
+        ports:
+        - containerPort: 8080
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 15
+          timeoutSeconds: 1
+          periodSeconds: 10
+        resources:
+          requests:
+            cpu: 200m
+
